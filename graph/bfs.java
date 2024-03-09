@@ -3,7 +3,7 @@ class Solution {
     public ArrayList<Integer> bfsOfGraph(int V, ArrayList<ArrayList<Integer>> adj) {
         boolean[] vis = new boolean[V];
         ArrayList<Integer> bfs = new ArrayList<>();
-        Queue<Integer> q = new LinkedList<>();
+        Dequeue<Integer> q = new ArrayDeque<>();
         q.add(0);
         vis[0] = true;
         while(!q.isEmpty()){
