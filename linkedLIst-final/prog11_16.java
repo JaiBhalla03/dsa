@@ -179,6 +179,22 @@ public class prog11_16 {
         }
         return ans.next;
     }
+    //remove consecutive sum 0 nodes
+    public static Node removeNodes(Node head){
+        if(head == null) return head;
+        int sum = 0;
+        Node curr = head;
+        while(curr != null){
+            sum += curr.data;
+            if(sum == 0){
+                head = curr.next;
+                return removeNodes(head);
+            }
+            curr = curr.next;
+        }
+        head.next = removeNodes(head.next);
+        return head;
+    }
     public static void main(String[] args){
         Scanner sc = new Scanner(System.in);
         String[] values1 = sc.nextLine().split(" ");
@@ -187,11 +203,7 @@ public class prog11_16 {
             head1 = insert(head1, Integer.parseInt(values1[i]));
         }
         display(head1);
-        head1 = reverse(head1);
-        deleteNode(head1);
-        head1 = reverse(head1);
-        display(head1);
-        Node newNode = rearrange(head1);
+        Node newNode = removeNodes(head1);
         display(newNode);
     }
 }
