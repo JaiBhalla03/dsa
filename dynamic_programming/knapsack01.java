@@ -52,4 +52,4 @@ class Solution
     }
 }
 
-
+//space optimised way
