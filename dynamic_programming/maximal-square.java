@@ -1,40 +1,27 @@
 class Solution {
-    public boolean isSquare(int n){
-        double x = Math.sqrt(n);
-        return x == Math.ceil(x);
+    public int max = 0;
+    public int helper(int i, int j, char[][] matrix, int m, int n, int[][] dp){
+        if(i >= m || j >= n) return 0;
+        if(dp[i][j] != -1) return dp[i][j];
+        int right = helper(i, j+1, matrix, m, n, dp);
+        int down = helper(i+1, j, matrix, m, n, dp);
+        int diagonal = helper(i+1, j+1, matrix, m, n, dp);
+        int ans = 0;
+        if(matrix[i][j] == '1') {
+            ans = 1 + Math.min(right, Math.min(down, diagonal));
+            max = Math.max(max, ans);
+        }
+        else return dp[i][j] = 0;
+        return dp[i][j] = ans;
     }
     public int maximalSquare(char[][] matrix) {
-        int ans = 0;
         int m = matrix.length;
         int n = matrix[0].length;
-        // for(int i = 0 ; i < n ; i++){
-        //     ans = Math.max(ans, helper(matrix, 0, i));
-        // }
-        int[][] dp=new int[m+1][n+1];
-        for(int i=1;i<m+1;i++){
-            for(int j=1;j<=n;j++){
-                if(matrix[i-1][j-1]=='1'){
-                    int rowBack =dp[i-1][j];
-                    int colBack =dp[i][j-1];
-                    dp[i][j]=1;
-                    if(colBack>0){
-                        dp[i][j]=colBack+rowBack;
-                    }
-                    else if(rowBack>0){
-                        dp[i][j]=rowBack+1;
-                    }
-                    if(ans<dp[i][j]&&isSquare(dp[i][j])){
-                        ans=dp[i][j];
-                    }
-                }
-            }
-        }
+        int[][] dp = new int[m+1][n+1];
         for(int[] x : dp){
-            for(int y : x){
-                System.out.print(y + " ");
-            }
-            System.out.println();
+            Arrays.fill(x, -1);
         }
-        return ans;
+        helper(0, 0, matrix, m, n, dp);
+        return max*max;
     }
 }
