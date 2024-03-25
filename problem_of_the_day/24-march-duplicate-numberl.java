@@ -17,3 +17,20 @@ class Solution {
         return slow;
     }
 }
+
+//another easier way
+class Solution {
+    public int findDuplicate(int[] nums) {
+        List<Integer> ans = new ArrayList<>();
+        for(int i = 0 ; i < nums.length ; i++){
+            int index = Math.abs(nums[i]) - 1;
+            if(nums[index] < 0){
+                ans.add(Math.abs(nums[i]));
+            }
+            else{
+                nums[index] = -nums[index];
+            }
+        }
+        return ans.get(0);
+    }
+}
