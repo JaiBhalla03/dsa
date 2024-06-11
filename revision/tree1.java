@@ -26,7 +26,7 @@ import java.util.*;
 * 23 lca of two nodes  (DONE)
 * 24 minimum distance between 2 nodes  (DONE)
 * 25 minimum swap to convert binary to bst
-* 26 duplicate subtree in binary tree
+* 26 duplicate subtree in binary tree (DONE)
 * 27 check if the graph is a tree or not
 * 28 duplicate subtree  (DONE)
 * 29 kth ancestor of a node in binary tree (DONE)
