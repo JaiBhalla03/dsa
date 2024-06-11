@@ -21,11 +21,16 @@ import java.util.*;
 * 18 diagonal traversal (DONE)
 * 19 isomorphic tree  (DONE)
 * 20 sum tree  (DONE)
-* 21 construct tree from inorder and preorder
-* 22 construct tree from strings with bracket
+* 21 construct tree from inorder and preorder (DONE)
+* 22 construct tree from strings with bracket (DONE)
 * 23 lca of two nodes  (DONE)
 * 24 minimum distance between 2 nodes  (DONE)
-*
+* 25 minimum swap to convert binary to bst
+* 26 duplicate subtree in binary tree
+* 27 check if the graph is a tree or not
+* 28 duplicate subtree  (DONE)
+* 29 kth ancestor of a node in binary tree (DONE)
+* 30 construct tree from inorder and postorder (DONE)
 * */
 
 public class tree1 {
@@ -430,18 +435,172 @@ public class tree1 {
         return d1 + d2;
     }
 
+    //function to find the kth ancestor of the binary tree
+    public static int len = 0;
+    public static void length(Node root){
+        if(root == null){
+            return;
+        }
+        length(root.left);
+        len++;
+        length(root.right);
+    }
+    public static int kthAncestor(Node root, int k, int node) {
+        length(root);
+        int[] parent = new int[len + 1];
+        Queue<Node> q = new LinkedList<>();
+        q.add(root);
+        parent[root.data] = -1;
+        while (!q.isEmpty()) {
+            Node curr = q.poll();
+            if (curr.left != null) {
+                q.add(curr.left);
+                parent[curr.left.data] = curr.data;
+            }
+            if (curr.right != null) {
+                q.add(curr.right);
+                parent[curr.right.data] = curr.data;
+            }
+        }
+        int count = 0;
+
+        while (node != -1) {
+            node = parent[node];
+            count++;
+            if (count == k) return node;
+        }
+        return -1;
+    }
+
+    //function to create a tree from string with brackets
+    public static Node fromString(String s, int[] start){
+        if(s == null || s.isEmpty() || start[0] > s.length()) return null;
+        boolean neg = false;
+        if(s.charAt(start[0]) == '-'){
+            start[0]++;
+            neg = true;
+        }
+        int num = 0;
+        int count = 0;
+        while(start[0] < s.length() && Character.isDigit(s.charAt(start[0]))){
+            int digit = Character.getNumericValue(s.charAt(start[0]));
+            start[0]++;
+            num = num*10 + digit;
+            count++;
+        }
+        if(neg) num = -num;
+        Node node = null;
+        if(count > 0) node = new Node(num);
+        if(start[0] < s.length() && s.charAt(start[0]) == '('){
+            start[0]++;
+            node.left = fromString(s, start);
+        }
+        if(start[0] < s.length() && s.charAt(start[0]) == ')'){
+            start[0]++;
+            return node;
+        }
+        if(start[0] < s.length() && s.charAt(start[0]) == '('){
+            start[0]++;
+            node.right = fromString(s, start);
+        }
+        if(start[0] < s.length() && s.charAt(start[0]) == ')'){
+            start[0]++;
+            return node;
+        }
+        return node;
+    }
+    public static Node buildFromString(String s){
+        int[] start = new int[]{0};
+        return fromString(s, start);
+    }
+
+    //function to construct the tree from inorder and preorder
+    public static int search(int[] arr, int start, int end, int x){
+        for(int i = start ; i <= end ; i++){
+            if(arr[i] == x) return i;
+        }
+        return -1;
+    }
+    public static Node preorderInorderHelper(int[] inorder, int[] preorder, int start, int end, int[] index){
+        if(start > end) return null;
+        int n = preorder[index[0]];
+        index[0]++;
+        Node node = new Node(n);
+        if(start == end) return node;
+        int pos = search(inorder, start, end, n);
+        node.left = preorderInorderHelper(inorder, preorder, start, pos - 1, index);
+        node.right = preorderInorderHelper(inorder, preorder, pos + 1, end, index);
+        return node;
+    }
+    public static Node preorderInorder(int[] inorder, int[] preorder){
+        int[] index = new int[]{0};
+        return preorderInorderHelper(inorder, preorder, 0, preorder.length - 1, index);
+    }
+
+    //function to construct the tree from inorder and postorder
+    public static Node postorderInorderHelper(int[] inorder, int[] postOrder, int start, int end, int[] index){
+        if(start > end) return null;
+        int n = postOrder[index[0]];
+        index[0]--;
+        Node node = new Node(n);
+        if(start == end) return node;
+        int pos = search(inorder, start, end, n);
+        node.right = postorderInorderHelper(inorder, postOrder, pos + 1, end, index);
+        node.left = postorderInorderHelper(inorder, postOrder, start, pos - 1, index);
+        return node;
+    }
+
+    public static Node postorderInorder(int[] inorder, int[] postOrder){
+        int[] index = new int[]{postOrder.length - 1};
+        return postorderInorderHelper(inorder, postOrder, 0, postOrder.length - 1, index);
+    }
+
+    //function to check is the binary tree contains a duplicate subtree
+    public static String duplicateSubtreeHelper(Node root, Map<String, Integer> mp){
+        if(root == null) return "$";
+        StringBuilder curr = new StringBuilder();
+        curr.append("#").append(root.data);
+        curr.append(duplicateSubtreeHelper(root.left, mp));
+        curr.append(duplicateSubtreeHelper(root.right, mp));
+        String serialized = curr.toString();
+        mp.put(serialized, mp.getOrDefault(serialized, 0) + 1);
+        return serialized;
+    }
+    public static boolean duplicateSubtree(Node root){
+        Map<String, Integer> mp = new HashMap<>();
+        duplicateSubtreeHelper(root, mp);
+        for(Map.Entry<String, Integer> e : mp.entrySet()){
+            if(e.getValue() > 1) return true;
+        }
+        return false;
+    }
+
+    // function to print all the duplicate tree in a binary
+    public static String solve(Node root, Map<String, Integer> mp, List<Node> ans){
+        if(root == null) return "N";
+        String curr = root.data + "," + solve(root.left, mp, ans) + "," + solve(root.right, mp, ans);
+        if(mp.containsKey(curr) && mp.get(curr) == 1) ans.add(root);
+        mp.put(curr, mp.getOrDefault(curr, 0) + 1);
+        return curr;
+    }
+    public static void printAllDuplicate(Node root){
+        List<Node> ans = new ArrayList<>();
+        Map<String, Integer> mp = new HashMap<>();
+        solve(root, mp, ans);
+        ans.sort((a, b)->(a.data - b.data));
+        for(Node node : ans){
+            reverseLevelOrder(node);
+        }
+    }
     public static void main(String[] args){
         Scanner sc = new Scanner(System.in);
         String str = sc.nextLine();
         Node root = buildTree(str);
-        int distance = minDistance(root, 2, 5);
-        System.out.println(distance);
+        printAllDuplicate(root);
         /*
-                    1
-                   / \
-                  2   3
-                   \   \
-                    4   5
+               1
+              / \
+             2   2
         */
 
     }
