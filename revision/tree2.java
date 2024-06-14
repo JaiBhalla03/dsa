@@ -8,6 +8,15 @@ import java.util.*;
 * 5 validate bst (DONE)
 * 6 kth smallest (DONE)
 * 7 binary tree to bst  (DONE)
+* 8 predecessor and successor
+* 9 check if the bst has a dead end or not
+* 10 delete node in bst
+* 11 flatten bst
+* 12 preorder to postorder
+* 13 count bst that are in a given range
+* 14 populate inorder successor for all nodes
+* 15 normal bst to balanced bst  (DONE)
+* 16 merge bst
 * */
 
 public class tree2 {
@@ -136,14 +145,144 @@ public class tree2 {
         if(right == k) ans = root.data;
         return right + kthLargest(root.left, k - right);
     }
+
+    //make the bst
+    //first creating an unbalanced
+    public static Node insert1(Node root, int x){
+        if(root == null) return new Node(x);
+        if(root.data == x) return root;
+        else if(root.data > x) {
+            root.left = insert(root.left, x);
+        }
+        else{
+            root.right = insert(root.right, x);
+        }
+        return root;
+    }
+    public static int index = 0;
+    public static void inorderBST(Node root, int[] inorder){
+        if(root == null) return;
+        inorderBST(root.left, inorder);
+        inorder[index++] = root.data;
+        inorderBST(root.right, inorder);
+    }
+
+    //balancing function
+    public static Node balancing(int[] inorder, int start, int end){
+        if(start > end) return null;
+        int mid = (start + end)/2;
+        Node node = new Node(inorder[mid]);
+        if(start == end) return node;
+        node.left = balancing(inorder, start, mid - 1);
+        node.right = balancing(inorder, mid + 1, end);
+        return node;
+    }
+
+    //function to flatten bst(this is similar to flattening and binary tree)
+    public static Node prev = null;
+    public static void inorderHelper(Node root){
+        if(root == null){
+            return;
+        }
+        inorderHelper(root.left);
+        prev.left = null;
+        prev.right = root;
+        prev = root;
+        inorderHelper(root.right);
+    }
+    public static Node flatten(Node root){
+        Node dummy = new Node(-1);
+        prev = dummy;
+        inorderHelper(root);
+        prev.left = null;
+        prev.right = null;
+        Node ans = dummy.right;
+        return ans;
+    }
+
+    //merging 2 bsts
+    public static List<Integer> mergeBST(Node root1, Node root2){
+        List<Integer> ans = new ArrayList<>();
+        Stack<Node> s1 = new Stack<>();
+        Stack<Node> s2 = new Stack<>();
+        while(root1 != null || root2 != null || !s1.isEmpty() || !s2.isEmpty()){
+            while(root1 != null){
+                s1.push(root1);
+                root1 = root1.left;
+            }
+            while(root2 != null){
+                s2.push(root2);
+                root2 = root2.left;
+            }
+
+            if(s2.isEmpty() || (!s1.isEmpty() && s1.peek().data <= s2.peek().data)){
+                root1 = s1.peek();
+                s1.pop();
+                ans.add(root1.data);
+                root1 = root1.right;
+            }
+            else{
+                root2 = s2.peek();
+                s2.pop();
+                ans.add(root2.data);
+                root2 = root2.right;
+            }
+        }
+        return ans;
+    }
+
+    public static Node remove(Node root, int k){
+        if(root == null) return root;
+        if(root.data > k){
+            root.left = remove(root.left, k);
+            return root;
+        }
+        else if(root.data < k){
+            root.right = remove(root.right, k);
+            return root;
+        }
+        else if(root.left == null){
+            Node temp = root.right;
+            return temp;
+        }
+        else if(root.right == null){
+            Node temp = root.left;
+            return temp;
+        }
+        else{
+            Node parent = root;
+            Node succ = root.right;
+            while(succ.left != null){
+                parent = succ;
+                succ = succ.left;
+            }
+            if(parent != root){
+                parent.left = succ.right;
+            }
+            else{
+                parent.right = succ.left;
+            }
+            root.data = succ.data;
+            return root;
+        }
+    }
+
     public static void main(String[] args){
         Scanner sc = new Scanner(System.in);
-        int[] in = {1,2,3,4,5,6,7};
-        Node root1 = buildBST(in, 0, in.length - 1);
-//        inorder(root1);
-//        System.out.println();
-//        levelOrder(root1);
-        ans = -1;
-        System.out.println(kthLargest(root1, 3));
+        int[] inorder1 = {1,3,5};
+        int[] inorder2 = {2,4,6};
+        Node root1 = buildBST(inorder1, 0, inorder1.length - 1);
+        Node root2 = buildBST(inorder2, 0, inorder2.length - 1);
+        List<Integer> l = mergeBST(root1, root2);
+
+        int[] inorder3 = new int[l.size()];
+        int i = 0;
+        for(Integer x : l){
+            inorder3[i++] = x;
+        }
+        Node root3 = buildBST(inorder3, 0, inorder3.length - 1);
+        levelOrder(root3);
+        Node root4 = remove(root3, 5);
+        levelOrder(root4);
     }
 }
